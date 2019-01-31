@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <title>Traffic Intersection</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <style>
+     /* super simple "reset" */
+     *, *::before, *::after { margin: 0; padding: 0; position: relative; }
+     html, body, #intersection { width: 100%; height: 100%; }
+    </style>
+  </head>
+  <body>
+    <svg id="intersection" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <pattern id="p-sidewalk" x="0" y="0" width="0.1" height="0.1">
+          <rect x="0" y="0" width="30" height="30" fill="rgb(0,120,180)"/>
+          <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+        </pattern>
+        <pattern id="p-walkway" x="0" y="0" width="1" height="0.038">
+          <rect x="0" y="8" width="30" height="6" fill="white"/>
+        </pattern>
+        <symbol id="road-arrow-left" viewBox="0 0 22 22">
+          <path d="M 0 16 l 2 0 c 6 0, 6 0, 6 -8 l -6 0 10 -8 10 8 -6 0 0 6 c 0 2, 0 6, -6 8 l -10 0 z" fill="white"/>
+        </symbol>
+        <symbol id="road-arrow-right" viewBox="0 0 22 22">
+          <path d="M 0 6 l 2 0 c 6 0, 6 0, 6 8 l -6 0 10 8 10 -8 -6 0 0 -6 c 0 -2, 0 -6, -6 -8 l -10 0 z" fill="white"/>
+        </symbol>
+      </defs>
+
+      <rect id="bg" x="0" y="0" width="1000" height="1000" fill="rgb(26,70,133)"/>
+      <rect id="sidewalk-0" x="0" y="0" width="300" height="300" fill="url(#p-sidewalk)"/>
+      <rect id="plot-0" x="0" y="0" width="270" height="270" fill="rgb(126,145,107)"/>
+      <rect id="sidewalk-1" x="700" y="0" width="300" height="300" fill="url(#p-sidewalk)"/>
+      <rect id="plot-1" x="730" y="0" width="270" height="270" fill="rgb(126,145,107)"/>
+      <rect id="sidewalk-2" x="0" y="700" width="300" height="300" fill="url(#p-sidewalk)"/>
+      <rect id="plot-2" x="0" y="730" width="270" height="270" fill="rgb(126,145,107)"/>
+      <rect id="sidewalk-3" x="700" y="700" width="300" height="300" fill="url(#p-sidewalk)"/>
+      <rect id="plot-3" x="730" y="730" width="270" height="270" fill="rgb(126,145,107)"/>
+
+      <g id="road-left">
+        <rect x="270" y="300" width="30" height="400" fill="url(#p-walkway)"/>
+        <path d="M 248 437 l 0 264" fill="none" stroke="white" stroke-width="8"/>
+        <path d="M 0 365 l 240 0" fill="none" stroke="white" stroke-width="3" stroke-dasharray="20 20"/>
+        <path d="M 0 503 l 250 0" fill="none" stroke="white" stroke-width="3"/>
+        <path d="M 0 568 l 250 0" fill="none" stroke="white" stroke-width="3"/>
+        <path d="M 0 633 l 250 0" fill="none" stroke="white" stroke-width="3"/>
+        <path d="M 0 430 l 250 0 c 6 0, 6 6, 0 6 l -260 0" fill="none" stroke="rgb(200,200,0)" stroke-width="3"/>
+        <use x="200" y="455" width="22" height="22" href="#road-arrow-left"/>
+        <use x="100" y="455" width="22" height="22" href="#road-arrow-left"/>
+        <use x="200" y="660" width="22" height="22" href="#road-arrow-right"/>
+        <use x="100" y="660" width="22" height="22" href="#road-arrow-right"/>
+      </g>
+    </svg>
+
+    <script src="./index.js"></script>
+  </body>
+</html>

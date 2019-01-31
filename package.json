@@ -1,0 +1,15 @@
+{
+  "name": "traffic-intersection",
+  "version": "0.1.0",
+  "description": "Edge Services Code Challenge",
+  "main": "index.html",
+  "author": "Wil Wilsman <hello@wilwilsman.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "parcel index.html"
+  },
+  "dependencies": {
+    "parcel-bundler": "^1.11.0",
+    "snapsvg": "^0.5.1"
+  }
+}

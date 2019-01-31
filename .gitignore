@@ -1,2 +1,5 @@
 .DS_Store
 /.gtm/
+/.cache/
+/node_modules/
+/dist/
