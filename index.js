@@ -38,18 +38,27 @@ class TrafficIntersection {
     this.timer = this.loop();
   }
 
-  // simple mutable state
+  // simple state
   state = {
     lastUpdate: 0,
     trafficDir: 'north-south',
     turnOnly: false
   };
 
+  // simple state update
+  update(state) {
+    this.state = {
+      ...this.state,
+      ...state
+    };
+  }
+
+  // animation loop
   loop = (now = performance.now()) => {
     let { lastUpdate: last } = this.state;
 
+    // every 20 seconds traffic lights change
     if (!last || now - last >= 20000) {
-      console.log('20 sec');
       this.changeLight();
       this.state.lastUpdate = now;
     }
@@ -84,7 +93,7 @@ class TrafficIntersection {
   }
 
   async changeLight() {
-    let { trafficDir, turnOnly } = this.state;
+    let { trafficDir } = this.state;
     let oppositeDir = trafficDir === 'north-south' ? 'east-west' : 'north-south';
 
     // change straight lights to yellow
@@ -98,14 +107,16 @@ class TrafficIntersection {
     // change other lane turn lights to green after 2 seconds
     await wait(2000);
     this.changeLane(oppositeDir, 'left', 'green');
+    // update direction for turning lane only
+    this.update({ trafficDir: oppositeDir, turnOnly: true });
     // change other lane turn lights to flashing yellow after 5 seconds
     await wait(5000);
     this.changeLane(oppositeDir, 'left', 'flashing');
     // change other lane straight lights to green after 1 second
     await wait(1000);
     this.changeLane(oppositeDir, 'straight', 'green');
-    // update direction
-    this.state.trafficDir = oppositeDir;
+    // update so straight traffic can go
+    this.update({ turnOnly: false });
   }
 }
 
