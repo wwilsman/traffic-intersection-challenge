@@ -334,24 +334,24 @@
   <g class="south" transform="translate(241.5, 758)">
     <use href="#road"/>
 
-    <g class="street-light" transform="translate(110, 44)">
+    <g class="street-light street-light--straight" transform="translate(110, 44)">
       <use href="#street-light"/>
-      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
-      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" opacity="0.1"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" opacity="0.1"/>
       <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
     </g>
 
-    <g class="street-light" transform="translate(171, 44)">
+    <g class="street-light street-light--straight" transform="translate(171, 44)">
       <use href="#street-light"/>
-      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
-      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" opacity="0.1"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" opacity="0.1"/>
       <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
     </g>
 
     <g class="street-light street-light--left" transform="translate(232, 44)">
       <use href="#street-light"/>
-      <use class="green" href="#light-arr" transform="translate(7, 6)" fill="#4DFA90" style="display:none"/>
-      <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" style="display:none"/>
+      <use class="green" href="#light-arr" transform="translate(7, 6)" fill="#4DFA90" opacity="0.1"/>
+      <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" opacity="0.1"/>
       <use class="red" href="#light-arr" transform="translate(7, 34)" fill="#FF5468"/>
     </g>
   </g>
@@ -359,49 +359,49 @@
   <g class="east" transform="translate(908.5, 514.5) rotate(-90) translate(-908.5, -514.5) translate(635, 364.5)">
     <use href="#road"/>
 
-    <g class="street-light" transform="translate(110, 44)">
+    <g class="street-light street-light--straight" transform="translate(110, 44)">
       <use href="#street-light"/>
-      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
-      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" opacity="0.1"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" opacity="0.1"/>
       <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
     </g>
 
-    <g class="street-light" transform="translate(171, 44)">
+    <g class="street-light street-light--straight" transform="translate(171, 44)">
       <use href="#street-light"/>
-      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
-      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" opacity="0.1"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" opacity="0.1"/>
       <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
     </g>
 
     <g class="street-light street-light--left" transform="translate(232, 44)">
       <use href="#street-light"/>
-      <use class="green" href="#light-arr" transform="translate(7, 6)" fill="#4DFA90" style="display:none"/>
-      <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" style="display:none"/>
+      <use class="green" href="#light-arr" transform="translate(7, 6)" fill="#4DFA90" opacity="0.1"/>
+      <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" opacity="0.1"/>
       <use class="red" href="#light-arr" transform="translate(7, 34)" fill="#FF5468"/>
     </g>
   </g>
 
-  <g class="north" transform="translate(515.5, 121.0) rotate(-180) translate(-515.5, -121) translate(242, -29)">
+  <g class="north" transform="translate(515.5, 121) rotate(-180) translate(-515.5, -121) translate(242, -29)">
     <use href="#road"/>
 
-    <g class="street-light" transform="translate(110, 44)">
+    <g class="street-light street-light--straight" transform="translate(110, 44)">
       <use href="#street-light"/>
-      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
-      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" opacity="0.1"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" opacity="0.1"/>
       <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
     </g>
 
-    <g class="street-light" transform="translate(171, 44)">
+    <g class="street-light street-light--straight" transform="translate(171, 44)">
       <use href="#street-light"/>
-      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
-      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" opacity="0.1"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" opacity="0.1"/>
       <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
     </g>
 
     <g class="street-light street-light--left" transform="translate(232, 44)">
       <use href="#street-light"/>
-      <use class="green" href="#light-arr" transform="translate(7, 6)" fill="#4DFA90" style="display:none"/>
-      <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" style="display:none"/>
+      <use class="green" href="#light-arr" transform="translate(7, 6)" fill="#4DFA90" opacity="0.1"/>
+      <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" opacity="0.1"/>
       <use class="red" href="#light-arr" transform="translate(7, 34)" fill="#FF5468"/>
     </g>
   </g>
@@ -409,24 +409,24 @@
   <g class="west" transform="translate(121.5, 514.5) rotate(-270) translate(-121.5, -514.5) translate(-152, 364.5)">
     <use href="#road"/>
 
-    <g class="street-light--1" transform="translate(110, 44)">
+    <g class="street-light street-light--straight" transform="translate(110, 44)">
       <use href="#street-light"/>
-      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
-      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" opacity="0.1"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" opacity="0.1"/>
       <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
     </g>
 
-    <g class="street-light--2" transform="translate(171, 44)">
+    <g class="street-light street-light--straight" transform="translate(171, 44)">
       <use href="#street-light"/>
-      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
-      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" opacity="0.1"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" opacity="0.1"/>
       <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
     </g>
 
-    <g class="street-light--left" transform="translate(232, 44)">
+    <g class="street-light street-light--left" transform="translate(232, 44)">
       <use href="#street-light"/>
-      <use class="green" href="#light-arr" transform="translate(7, 6)" fill="#4DFA90" style="display:none"/>
-      <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" style="display:none"/>
+      <use class="green" href="#light-arr" transform="translate(7, 6)" fill="#4DFA90" opacity="0.1"/>
+      <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" opacity="0.1"/>
       <use class="red" href="#light-arr" transform="translate(7, 34)" fill="#FF5468"/>
     </g>
   </g>

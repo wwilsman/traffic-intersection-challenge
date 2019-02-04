@@ -9,8 +9,14 @@
     "start": "parcel index.html"
   },
   "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.3.0",
+    "@babel/plugin-transform-runtime": "^7.2.0",
+    "@babel/preset-env": "^7.3.1",
     "parcel-bundler": "^1.11.0",
     "parcel-plugin-inlinesvg": "^0.1.0",
     "snapsvg": "^0.5.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2"
   }
 }
