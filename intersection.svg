@@ -5,6 +5,19 @@
       <rect x="0" y="0" width="66" height="404" rx="33"/>
     </mask>
 
+    <symbol id="light-arr">
+      <polygon points="0 4.5 0 3.5 3.5 3.5 3.5 4.5"/>
+      <polygon points="2.64317093 1.35024708 3.35682907 0.649752921 6.6796001 4.03496684 3.32859999 6.9568584 2.67140001 6.20314214 5.22285564 3.97841029"/>
+    </symbol>
+
+    <symbol id="street-light">
+      <rect fill="black" x="0" y="0" width="20" height="48" rx="8"/>
+      <circle fill="#303030" cx="10" cy="10" r="5"/>
+      <circle fill="#303030" cx="10" cy="24" r="5"/>
+      <circle fill="#303030" cx="10" cy="38" r="5"/>
+      <path d="M10,48 L10,53" stroke="black" stroke-width="6"/>
+    </symbol>
+
     <symbol id="road" overflow="visible">
       <rect fill="#1A4685" x="0" y="0" width="517" height="420"/>
 
@@ -27,7 +40,6 @@
         <path d="M0,311 L66,311" stroke="#F0C800" stroke-width="6" mask="url(#mask-d)" transform="translate(33, 311) rotate(-30) translate(-33, -311)"/>
         <path d="M0,376 L66,376" stroke="#F0C800" stroke-width="6" mask="url(#mask-d)" transform="translate(33, 376) rotate(-30) translate(-33, -376)"/>
         <path d="M0,343 L66,343" stroke="#F0C800" stroke-width="6" mask="url(#mask-d)" transform="translate(33, 343) rotate(-30) translate(-33, -343)"/>
-
         <rect fill="none" stroke="#F0C800" stroke-width="8" mask="url(#mask-d)" x="2" y="2" width="62" height="400" rx="31"/>
       </g>
 
@@ -71,46 +83,6 @@
         <rect x="0" y="270" width="30" height="30"/>
         <rect x="0" y="330" width="30" height="30"/>
         <rect x="0" y="390" width="30" height="30"/>
-      </g>
-
-      <g stroke-width="1" transform="translate(110, 44)">
-        <rect fill="black" x="0" y="0" width="20" height="48" rx="8"/>
-        <circle stroke="white" fill="#4DFA90" cx="10" cy="10" r="5"/>
-        <circle stroke="white" fill="#FABE4D" cx="10" cy="24" r="5"/>
-        <circle stroke="white" fill="#FF5468" cx="10" cy="38" r="5"/>
-        <path d="M10,48 L10,55.0157014" stroke="black" stroke-width="6"/>
-      </g>
-
-      <g stroke-width="1" transform="translate(171, 44)">
-        <rect fill="black" x="0" y="0" width="20" height="48" rx="8"/>
-        <circle stroke="white" fill="#4DFA90" cx="10" cy="10" r="5"/>
-        <circle stroke="white" fill="#FABE4D" cx="10" cy="24" r="5"/>
-        <circle stroke="white" fill="#FF5468" cx="10" cy="38" r="5"/>
-        <path d="M10,48 L10,55.0157014" stroke="black" stroke-width="6"/>
-      </g>
-
-      <g stroke-width="1" transform="translate(232, 44)">
-        <rect fill="black" x="0" y="0" width="20" height="48" rx="8"/>
-
-        <circle stroke="white" fill="#303030" cx="10" cy="10" r="5"/>
-        <g transform="translate(7, 6)" fill="#4DFA90">
-          <polygon points="0 4.5 0 3.5 3.5 3.5 3.5 4.5"/>
-          <polygon points="2.64317093 1.35024708 3.35682907 0.649752921 6.6796001 4.03496684 3.32859999 6.9568584 2.67140001 6.20314214 5.22285564 3.97841029"/>
-        </g>
-
-        <circle stroke="white" fill="#303030" cx="10" cy="24" r="5"/>
-        <g transform="translate(7, 20)" fill="#FABE4D">
-          <polygon points="0 4.5 0 3.5 3.5 3.5 3.5 4.5"/>
-          <polygon points="2.64317093 1.35024708 3.35682907 0.649752921 6.6796001 4.03496684 3.32859999 6.9568584 2.67140001 6.20314214 5.22285564 3.97841029"/>
-        </g>
-
-        <circle stroke="white" fill="#303030" cx="10" cy="38" r="5"/>
-        <g transform="translate(7, 34)" fill="#FF5468">
-          <polygon points="0 4.5 0 3.5 3.5 3.5 3.5 4.5"/>
-          <polygon points="2.64317093 1.35024708 3.35682907 0.649752921 6.6796001 4.03496684 3.32859999 6.9568584 2.67140001 6.20314214 5.22285564 3.97841029"/>
-        </g>
-
-        <path d="M10,48 L10,55.0157014" stroke="black" stroke-width="6"/>
       </g>
 
       <polyline fill="none" stroke="#C6C6C6" stroke-width="6" points="0 29 2.26179195e-16 100.015701 260.766858 100.015701"/>
@@ -359,10 +331,105 @@
   <rect fill="#7E916B" x="0" y="0" width="1030" height="1030"/>
   <rect fill="#1A4685" x="255" y="255" width="520" height="520"/>
 
-  <use href="#road" transform="translate(241.5, 758)"/>
-  <use href="#road" transform="translate(908.5, 514.5) rotate(-90) translate(-908.5, -514.5) translate(635, 364.5)"/>
-  <use href="#road" transform="translate(515.5, 121.0) rotate(-180) translate(-515.5, -121) translate(242, -29)"/>
-  <use href="#road" transform="translate(121.5, 514.5) rotate(-270) translate(-121.5, -514.5) translate(-152, 364.5)"/>
+  <g class="south" transform="translate(241.5, 758)">
+    <use href="#road"/>
+
+    <g class="street-light" transform="translate(110, 44)">
+      <use href="#street-light"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
+    </g>
+
+    <g class="street-light" transform="translate(171, 44)">
+      <use href="#street-light"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
+    </g>
+
+    <g class="street-light street-light--left" transform="translate(232, 44)">
+      <use href="#street-light"/>
+      <use class="green" href="#light-arr" transform="translate(7, 6)" fill="#4DFA90" style="display:none"/>
+      <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" style="display:none"/>
+      <use class="red" href="#light-arr" transform="translate(7, 34)" fill="#FF5468"/>
+    </g>
+  </g>
+
+  <g class="east" transform="translate(908.5, 514.5) rotate(-90) translate(-908.5, -514.5) translate(635, 364.5)">
+    <use href="#road"/>
+
+    <g class="street-light" transform="translate(110, 44)">
+      <use href="#street-light"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
+    </g>
+
+    <g class="street-light" transform="translate(171, 44)">
+      <use href="#street-light"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
+    </g>
+
+    <g class="street-light street-light--left" transform="translate(232, 44)">
+      <use href="#street-light"/>
+      <use class="green" href="#light-arr" transform="translate(7, 6)" fill="#4DFA90" style="display:none"/>
+      <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" style="display:none"/>
+      <use class="red" href="#light-arr" transform="translate(7, 34)" fill="#FF5468"/>
+    </g>
+  </g>
+
+  <g class="north" transform="translate(515.5, 121.0) rotate(-180) translate(-515.5, -121) translate(242, -29)">
+    <use href="#road"/>
+
+    <g class="street-light" transform="translate(110, 44)">
+      <use href="#street-light"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
+    </g>
+
+    <g class="street-light" transform="translate(171, 44)">
+      <use href="#street-light"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
+    </g>
+
+    <g class="street-light street-light--left" transform="translate(232, 44)">
+      <use href="#street-light"/>
+      <use class="green" href="#light-arr" transform="translate(7, 6)" fill="#4DFA90" style="display:none"/>
+      <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" style="display:none"/>
+      <use class="red" href="#light-arr" transform="translate(7, 34)" fill="#FF5468"/>
+    </g>
+  </g>
+
+  <g class="west" transform="translate(121.5, 514.5) rotate(-270) translate(-121.5, -514.5) translate(-152, 364.5)">
+    <use href="#road"/>
+
+    <g class="street-light--1" transform="translate(110, 44)">
+      <use href="#street-light"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
+    </g>
+
+    <g class="street-light--2" transform="translate(171, 44)">
+      <use href="#street-light"/>
+      <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" style="display:none"/>
+      <circle class="yellow" fill="#FABE4D" cx="10" cy="24" r="5" style="display:none"/>
+      <circle class="red" fill="#FF5468" cx="10" cy="38" r="5"/>
+    </g>
+
+    <g class="street-light--left" transform="translate(232, 44)">
+      <use href="#street-light"/>
+      <use class="green" href="#light-arr" transform="translate(7, 6)" fill="#4DFA90" style="display:none"/>
+      <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" style="display:none"/>
+      <use class="red" href="#light-arr" transform="translate(7, 34)" fill="#FF5468"/>
+    </g>
+  </g>
 
   <use href="#car-r" transform="translate(888, 360) rotate(-90) translate(-888, -360) translate(865.5, 317)"/>
   <use href="#car-g" transform="translate(524, 846)"/>
