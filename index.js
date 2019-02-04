@@ -1,5 +1,12 @@
 import Snap from 'snapsvg';
-import intersection from './intersection.svg';
+
+// do not use parcel-plugin-inlinesvg as we cannot configure SVGO to
+// keep our SVG as-is with symbols and proper ids
+const intersection = require('fs')
+  .readFileSync('./intersection.svg', 'utf8')
+  .replace(/^<\?.*?\n/, '');
+
+const { random, floor } = Math;
 
 // simple promise timeout
 function wait(timeout) {
@@ -8,41 +15,69 @@ function wait(timeout) {
   });
 }
 
+// returns a random item from an array
+function getRandItem(arr) {
+  return arr[floor(random() * arr.length)];
+}
+
+// returns a random vehicle ID
+function getRandVehicleId() {
+  let ids = ['r', 'g', 'b', 's', 'p', 't'];
+  return `#car-${getRandItem(ids)}`;
+}
+
+// returns a random direction and lane number
+function getRandLane() {
+  let dirs = ['north', 'south', 'east', 'west'];
+  return [getRandItem(dirs), getRandItem([0, 1, 2, 3])];
+}
+
 class TrafficIntersection {
   // injects the SVG content into the DOM
   static load() {
     if (this.loaded) return;
     let root = document.querySelector('#root');
     root.innerHTML = intersection;
-    root.firstChild.id = 'intersection';
     this.loaded = true;
   }
 
   // create a new singleton instance to start things off
-  static start() {
+  static start(options) {
     if (!this.loaded) this.load();
-    this.instance = this.instance || new TrafficIntersection();
+    this.instance = this.instance || new TrafficIntersection(options);
     return this.instance;
   }
 
-  constructor() {
+  constructor({ timing, rate }) {
     // there can only be one
     if (this.constructor.instance) {
       return this.constructor.instance;
     }
 
+    // save options
+    this.options = { timing, rate };
+
     // use Snap.svg to animate things
     this.svg = new Snap('#intersection');
 
-    // start light timing
-    this.timer = this.loop();
+    // start looping
+    this._animframeid = this.loop();
   }
 
   // simple state
   state = {
-    lastUpdate: 0,
+    lastChange: 0,
+    lastVehicle: 0,
     trafficDir: 'north-south',
-    turnOnly: false
+    turnOnly: false,
+
+    // dir + lane number
+    vehicles: {
+      north: [[], [], [], []],
+      south: [[], [], [], []],
+      east: [[], [], [], []],
+      west: [[], [], [], []]
+    }
   };
 
   // simple state update
@@ -55,12 +90,18 @@ class TrafficIntersection {
 
   // animation loop
   loop = (now = performance.now()) => {
-    let { lastUpdate: last } = this.state;
+    let { lastChange, lastVehicle } = this.state;
 
-    // every 20 seconds traffic lights change
-    if (!last || now - last >= 20000) {
+    // traffic light update
+    if (!lastChange || now - lastChange >= this.options.timing) {
+      this.update({ lastChange: now });
       this.changeLight();
-      this.state.lastUpdate = now;
+    }
+
+    // vehicle spawn rate
+    if (!lastVehicle || now - lastVehicle >= this.options.rate) {
+      this.update({ lastVehicle: now });
+      this.addRandomVehicle();
     }
 
     requestAnimationFrame(this.loop);
@@ -118,7 +159,61 @@ class TrafficIntersection {
     // update so straight traffic can go
     this.update({ turnOnly: false });
   }
+
+  addRandomVehicle() {
+    let [dir, lane] = getRandLane();
+    let road = this.state.vehicles[dir];
+
+    // no more than 2 vehicles allowed in any lane
+    if (road[lane].length >= 2) return;
+
+    // TODO: if we want to gaurantee a new vehicle, we need to
+    // optimize the random lane function to not account for spaces
+    // where there is already a car; otherwise the not-so-random JS
+    // `random` function will slow down the run loop as it misses
+    // empty spaces.
+
+    // while (road[lane].length >= 2) {
+    //   [dir, lane] = getRandLane();
+    //   road = this.state.vehicles[dir];
+    // }
+
+    // get a random vehicle and position it into a lane behind any
+    // other vehicles in the lane
+    let vehicle = this.svg.use(getRandVehicleId());
+    let x = 60 * lane; // lane width 60
+    let y = 100 * road[lane].length; // car height 100
+
+    if (dir === 'north') {
+      // lane 0 is 506-, stop line is 180-
+      vehicle.transform(`t${506 - x},${180 - y} r180`);
+    } else if (dir === 'south') {
+      // lane 0 is 524+, stop line is 850+
+      vehicle.transform(`t${524 + x},${850 + y}`);
+    } else if (dir === 'east') {
+      // lane 0 is 850+, stop line is 506-
+      vehicle.transform(`t${850 + y},${506 - x} r270`);
+    } else if (dir === 'west') {
+      // lane 0 is 180-, stop line is 524+
+      vehicle.transform(`t${180 - y},${524 + x} r90`);
+    }
+
+    // track all vehicles coming through the intersection
+    this.update({
+      vehicles: {
+        ...this.state.vehicles,
+        [dir]: [
+          ...road.slice(0, lane),
+          road[lane].concat(vehicle),
+          ...road.slice(lane + 1)
+        ]
+      }
+    });
+  }
 }
 
 // kick things off
-TrafficIntersection.start();
+TrafficIntersection.start({
+  timing: 20000,
+  rate: 1000
+});
