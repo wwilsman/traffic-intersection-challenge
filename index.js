@@ -50,6 +50,13 @@ class TrafficIntersection {
     return this.instance;
   }
 
+  // cleanup animation frame and root element
+  static stop() {
+    cancelAnimationFrame(this.instance._animframeid);
+    let root = document.querySelector('#root');
+    root.innerHTML = '';
+  }
+
   constructor({ timing, rate }) {
     // there can only be one
     if (this.constructor.instance) {
@@ -63,7 +70,7 @@ class TrafficIntersection {
     this.svg = new Snap('#intersection');
 
     // start looping
-    this._animframeid = this.loop();
+    this.loop();
   }
 
   // simple state
@@ -107,7 +114,7 @@ class TrafficIntersection {
     }
 
     // loop again
-    requestAnimationFrame(this.loop);
+    this._animframeid = requestAnimationFrame(this.loop);
   }
 
   changeLane(dir, lane, color) {
@@ -224,3 +231,10 @@ TrafficIntersection.start({
   timing: 20000,
   rate: 500
 });
+
+// helps performance during dev
+if (module.hot) {
+  module.hot.dispose(() => {
+    TrafficIntersection.stop();
+  });
+}
