@@ -84,8 +84,6 @@
         <rect x="0" y="330" width="30" height="30"/>
         <rect x="0" y="390" width="30" height="30"/>
       </g>
-
-      <polyline fill="none" stroke="#C6C6C6" stroke-width="6" points="0 29 2.26179195e-16 100.015701 260.766858 100.015701"/>
     </symbol>
 
     <symbol id="car-r" width="50" height="100">
@@ -331,9 +329,14 @@
   <rect fill="#7E916B" x="0" y="0" width="1030" height="1030"/>
   <rect fill="#1A4685" x="255" y="255" width="520" height="520"/>
 
-  <g class="south" transform="translate(241.5, 758)">
-    <use href="#road"/>
+  <use href="#road" transform="translate(241.5, 758)"/>
+  <use href="#road" transform="translate(908.5, 514.5) rotate(-90) translate(-908.5, -514.5) translate(635, 364.5)"/>
+  <use href="#road" transform="translate(515.5, 121) rotate(-180) translate(-515.5, -121) translate(242, -29)"/>
+  <use href="#road" transform="translate(121.5, 514.5) rotate(-270) translate(-121.5, -514.5) translate(-152, 364.5)"/>
 
+  <g class="cars"/>
+
+  <g class="south" transform="translate(241.5, 758)">
     <g class="street-light street-light--straight" transform="translate(110, 44)">
       <use href="#street-light"/>
       <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" opacity="0.1"/>
@@ -354,11 +357,11 @@
       <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" opacity="0.1"/>
       <use class="red" href="#light-arr" transform="translate(7, 34)" fill="#FF5468"/>
     </g>
+
+    <polyline fill="none" stroke="#C6C6C6" stroke-width="6" points="0 29 2.26179195e-16 100.015701 260.766858 100.015701"/>
   </g>
 
   <g class="east" transform="translate(908.5, 514.5) rotate(-90) translate(-908.5, -514.5) translate(635, 364.5)">
-    <use href="#road"/>
-
     <g class="street-light street-light--straight" transform="translate(110, 44)">
       <use href="#street-light"/>
       <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" opacity="0.1"/>
@@ -379,11 +382,11 @@
       <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" opacity="0.1"/>
       <use class="red" href="#light-arr" transform="translate(7, 34)" fill="#FF5468"/>
     </g>
+
+    <polyline fill="none" stroke="#C6C6C6" stroke-width="6" points="0 29 2.26179195e-16 100.015701 260.766858 100.015701"/>
   </g>
 
   <g class="north" transform="translate(515.5, 121) rotate(-180) translate(-515.5, -121) translate(242, -29)">
-    <use href="#road"/>
-
     <g class="street-light street-light--straight" transform="translate(110, 44)">
       <use href="#street-light"/>
       <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" opacity="0.1"/>
@@ -404,11 +407,11 @@
       <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" opacity="0.1"/>
       <use class="red" href="#light-arr" transform="translate(7, 34)" fill="#FF5468"/>
     </g>
+
+    <polyline fill="none" stroke="#C6C6C6" stroke-width="6" points="0 29 2.26179195e-16 100.015701 260.766858 100.015701"/>
   </g>
 
   <g class="west" transform="translate(121.5, 514.5) rotate(-270) translate(-121.5, -514.5) translate(-152, 364.5)">
-    <use href="#road"/>
-
     <g class="street-light street-light--straight" transform="translate(110, 44)">
       <use href="#street-light"/>
       <circle class="green" fill="#4DFA90" cx="10" cy="10" r="5" opacity="0.1"/>
@@ -429,5 +432,7 @@
       <use class="yellow" href="#light-arr" transform="translate(7, 20)" fill="#FABE4D" opacity="0.1"/>
       <use class="red" href="#light-arr" transform="translate(7, 34)" fill="#FF5468"/>
     </g>
+
+    <polyline fill="none" stroke="#C6C6C6" stroke-width="6" points="0 29 2.26179195e-16 100.015701 260.766858 100.015701"/>
   </g>
 </svg>

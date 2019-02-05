@@ -77,8 +77,12 @@ class TrafficIntersection {
   state = {
     lastChange: 0,
     lastVehicle: 0,
-    trafficDir: 'north-south',
-    turnOnly: false,
+
+    lights: {
+      // turn, go, stop
+      'north-south': 'go',
+      'east-west': 'stop'
+    },
 
     // dir + lane number
     vehicles: {
@@ -93,7 +97,17 @@ class TrafficIntersection {
   update(state) {
     this.state = {
       ...this.state,
-      ...state
+      ...state,
+      // lights update
+      lights: {
+        ...this.state.lights,
+        ...state.lights
+      },
+      // vehicles update
+      vehicles: {
+        ...this.state.vehicles,
+        ...state.vehicles
+      }
     };
   }
 
@@ -107,10 +121,11 @@ class TrafficIntersection {
       this.changeLight();
     }
 
-    // vehicle spawn rate
+    // vehicle spawn / response rate
     if (!lastVehicle || now - lastVehicle >= this.options.rate) {
       this.update({ lastVehicle: now });
       this.addRandomVehicle();
+      this.pingVehicles();
     }
 
     // loop again
@@ -118,7 +133,6 @@ class TrafficIntersection {
   }
 
   changeLane(dir, lane, color) {
-    // support multiple directions at once
     dir.split('-').forEach(d => {
       // change all lanes for a direction
       this.svg.selectAll(`.${d} .street-light--${lane}`)
@@ -144,22 +158,28 @@ class TrafficIntersection {
   }
 
   async changeLight() {
-    let { trafficDir } = this.state;
-    let oppositeDir = trafficDir === 'north-south' ? 'east-west' : 'north-south';
+    let { lights } = this.state;
+    let trafficDir = keys(lights).find(k => lights[k] === 'go');
+    let oppositeDir = keys(lights).find(k => lights[k] === 'stop');
+
+    if (!trafficDir || !oppositeDir) console.log(lights);
 
     // change straight lights to yellow
     this.changeLane(trafficDir, 'straight', 'yellow');
     // change flashing yellow turn to solid
     this.changeLane(trafficDir, 'left', 'yellow');
+    // start stopping on yellow
+    this.update({ lights: { [trafficDir]: 'stop' } });
     // change all yellow lights to red after 2 seconds
     await wait(2000);
     this.changeLane(trafficDir, 'straight', 'red');
     this.changeLane(trafficDir, 'left', 'red');
+
     // change other lane turn lights to green after 2 seconds
     await wait(2000);
     this.changeLane(oppositeDir, 'left', 'green');
     // update direction for turning lane only
-    this.update({ trafficDir: oppositeDir, turnOnly: true });
+    this.update({ lights: { [oppositeDir]: 'turn' } });
     // change other lane turn lights to flashing yellow after 5 seconds
     await wait(5000);
     this.changeLane(oppositeDir, 'left', 'flashing');
@@ -167,7 +187,48 @@ class TrafficIntersection {
     await wait(1000);
     this.changeLane(oppositeDir, 'straight', 'green');
     // update so straight traffic can go
-    this.update({ turnOnly: false });
+    this.update({ lights: { [oppositeDir]: 'go' } });
+  }
+
+  canDrive(dir, lane) {
+    let { lights } = this.state;
+    let key = (dir === 'north' || dir === 'south') ? 'north-south' : 'east-west';
+    // TODO: logic for turn lanes
+    return lights[key] === 'go' && lane > 0 && lane < 3;
+  }
+
+  calcTransform(dir, lane, pos, index = 0) {
+    let { vehicles } = this.state;
+    let laneOffset = 60 * lane; // lane width 60
+    let posOffset = 100 * index; // car height 100
+    let r = 0, x = 0, y = 0;
+
+    if (dir === 'north') {
+      r = 180; // face south
+      x = 506 - laneOffset; // lanes start at 506 and descrease
+      y = pos === 'stop' ? 180 - posOffset // stop line is at 180
+        : pos === 'start' ? -100 - posOffset // off screen
+        : 1230 - posOffset; // other side
+    } else if (dir === 'south') {
+      x = 524 + laneOffset; // lanes start at 524 and increase
+      y = pos === 'stop' ? 850 + posOffset // stop line is at 180
+        : pos === 'start' ? 1130 + posOffset // off screen
+        : -200 + posOffset; // other side
+    } else if (dir === 'east') {
+      r = 270; // face west
+      y = 506 - laneOffset; // lanes start at 506 and descrease
+      x = pos === 'stop' ? 850 + posOffset // stop line is at 850
+        : pos === 'start' ? 1130 + posOffset // off screen
+        : -200 + posOffset; // other side
+    } else if (dir === 'west') {
+      r = 90; // face east
+      y = 524 + laneOffset; // lanes start at 524 and increase
+      x = pos === 'stop' ? 180 - posOffset // stop line is at 180
+        : pos === 'start' ? -100 - posOffset // off screen
+        : 1230 - posOffset; // other side
+    }
+
+    return `t${x},${y} r${r}`;
   }
 
   addRandomVehicle() {
@@ -186,42 +247,75 @@ class TrafficIntersection {
     // if there is no more room for vehicles, abort
     if ((dir || lane) == null) return;
 
-    // get a random vehicle and position it into a lane behind any
-    // other vehicles in the lane
+    // get a random vehicle
     let vehicle = this.svg.use(getRandVehicleId());
-    let x = 60 * lane; // lane width 60
-    let y = 100 * vehicles[dir][lane].length; // car height 100
+    let canDrive = this.canDrive(dir, lane);
+    let index = vehicles[dir][lane].length;
 
-    if (dir === 'north') {
-      // lane 0 is 506-, stop line is 180-
-      vehicle.transform(`t${506 - x},${-100 - y} r180`) // start offscreen
-        .animate({ transform: `t${506 - x},${180 - y} r180` }, 1000, mina.easein);
-    } else if (dir === 'south') {
-      // lane 0 is 524+, stop line is 850+
-      vehicle.transform(`t${524 + x},${1130 + y}`) // start offscreen
-        .animate({ transform: `t${524 + x},${850 + y}` }, 1000, mina.easein);
-    } else if (dir === 'east') {
-      // lane 0 is 850+, stop line is 506-
-      vehicle.transform(`t${1130 + y},${506 - x} r270`) // start offscreen
-        .animate({ transform: `t${850 + y},${506 - x} r270` }, 1000, mina.easein);
-    } else if (dir === 'west') {
-      // lane 0 is 180-, stop line is 524+
-      vehicle.transform(`t${-100 - y},${524 + x} r90`) // start offscreen
-        .animate({ transform: `t${180 - y},${524 + x} r90` }, 1000, mina.easein);
+    // position in the lane
+    let start = this.calcTransform(dir, lane, 'start', index);
+    let end = this.calcTransform(dir, lane, !canDrive && 'stop', index);
+
+    vehicle
+      .appendTo(this.svg.select('.cars'))
+      .transform(start)
+      .animate(
+        { transform: end },
+        canDrive ? 3000 : 1000,
+        canDrive ? mina.linear : mina.easein
+      );
+
+    // track all vehicles stopping at the intersection
+    if (!canDrive) {
+      this.update({
+        vehicles: {
+          [dir]: [
+            ...vehicles[dir].slice(0, lane),
+            vehicles[dir][lane].concat(vehicle),
+            ...vehicles[dir].slice(lane + 1)
+          ]
+        }
+      });
     }
+  }
 
-    // track all vehicles coming through the intersection
-    this.update({
-      // this doesn't really _need_ to be immutable, but the update
-      // method is, so let's treat state like it should be
-      vehicles: {
-        ...vehicles,
-        [dir]: [
-          ...vehicles[dir].slice(0, lane),
-          vehicles[dir][lane].concat(vehicle),
-          ...vehicles[dir].slice(lane + 1)
-        ]
-      }
+  pingVehicles() {
+    let { lights, vehicles } = this.state;
+
+    entries(vehicles).forEach(([dir, road]) => {
+      road.forEach(async (lane, l) => {
+        if (this.canDrive(dir, l)) {
+          // right turn
+          if (l === 0) {
+            // TODO
+
+          // straight
+          } else if (l < 3) {
+            lane.forEach(async (vehicle, i) => {
+              await wait(200 * i + floor(100 * random())); // cars don't start at the same time
+              let t = this.calcTransform(dir, l, 'end', i);
+              vehicle.animate({ transform: t }, 2200, mina.easeout, vehicle.remove);
+            });
+
+            // wait half the rate before considering the lane empty
+            await wait(this.options.rate / 2);
+
+            this.update({
+              vehicles: {
+                [dir]: [
+                  ...this.state.vehicles[dir].slice(0, l),
+                  [], // lane should now be empty
+                  ...this.state.vehicles[dir].slice(l + 1)
+                ]
+              }
+            });
+
+          // left turn
+          } else if (l === 3) {
+            // TODO
+          }
+        }
+      });
     });
   }
 }
@@ -229,12 +323,5 @@ class TrafficIntersection {
 // kick things off
 TrafficIntersection.start({
   timing: 20000,
-  rate: 500
+  rate: 1000
 });
-
-// helps performance during dev
-if (module.hot) {
-  module.hot.dispose(() => {
-    TrafficIntersection.stop();
-  });
-}
