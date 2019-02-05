@@ -7,6 +7,7 @@ const intersection = require('fs')
   .replace(/^<\?.*?\n/, '');
 
 const { random, floor } = Math;
+const { keys, entries } = Object;
 
 // simple promise timeout
 function wait(timeout) {
@@ -16,7 +17,7 @@ function wait(timeout) {
 }
 
 // returns a random item from an array
-function getRandItem(arr) {
+function getRandItem(arr = []) {
   return arr[floor(random() * arr.length)];
 }
 
@@ -26,10 +27,11 @@ function getRandVehicleId() {
   return `#car-${getRandItem(ids)}`;
 }
 
-// returns a random direction and lane number
-function getRandLane() {
-  let dirs = ['north', 'south', 'east', 'west'];
-  return [getRandItem(dirs), getRandItem([0, 1, 2, 3])];
+// returns a random direction and lane number from the available lanes
+function getRandLane(lanes) {
+  let dir = getRandItem(keys(lanes));
+  let lane = getRandItem(lanes[dir])
+  return [dir, lane];
 }
 
 class TrafficIntersection {
@@ -104,6 +106,7 @@ class TrafficIntersection {
       this.addRandomVehicle();
     }
 
+    // loop again
     requestAnimationFrame(this.loop);
   }
 
@@ -161,51 +164,55 @@ class TrafficIntersection {
   }
 
   addRandomVehicle() {
-    let [dir, lane] = getRandLane();
-    let road = this.state.vehicles[dir];
+    let { vehicles } = this.state;
 
-    // no more than 2 vehicles allowed in any lane
-    if (road[lane].length >= 2) return;
+    // get a random lane from all of the available lanes that have
+    // space for more vehicles
+    let [dir, lane] = getRandLane(
+      entries(vehicles).reduce((lanes, [d, road]) => {
+        // each lane has a max of 2 cars
+        let avail = [...road.keys()].filter(l => road[l].length < 2);
+        return avail.length ? { ...lanes, [d]: avail } : lanes;
+      }, {})
+    );
 
-    // TODO: if we want to gaurantee a new vehicle, we need to
-    // optimize the random lane function to not account for spaces
-    // where there is already a car; otherwise the not-so-random JS
-    // `random` function will slow down the run loop as it misses
-    // empty spaces.
-
-    // while (road[lane].length >= 2) {
-    //   [dir, lane] = getRandLane();
-    //   road = this.state.vehicles[dir];
-    // }
+    // if there is no more room for vehicles, abort
+    if ((dir || lane) == null) return;
 
     // get a random vehicle and position it into a lane behind any
     // other vehicles in the lane
     let vehicle = this.svg.use(getRandVehicleId());
     let x = 60 * lane; // lane width 60
-    let y = 100 * road[lane].length; // car height 100
+    let y = 100 * vehicles[dir][lane].length; // car height 100
 
     if (dir === 'north') {
       // lane 0 is 506-, stop line is 180-
-      vehicle.transform(`t${506 - x},${180 - y} r180`);
+      vehicle.transform(`t${506 - x},${-100 - y} r180`) // start offscreen
+        .animate({ transform: `t${506 - x},${180 - y} r180` }, 1000, mina.easein);
     } else if (dir === 'south') {
       // lane 0 is 524+, stop line is 850+
-      vehicle.transform(`t${524 + x},${850 + y}`);
+      vehicle.transform(`t${524 + x},${1130 + y}`) // start offscreen
+        .animate({ transform: `t${524 + x},${850 + y}` }, 1000, mina.easein);
     } else if (dir === 'east') {
       // lane 0 is 850+, stop line is 506-
-      vehicle.transform(`t${850 + y},${506 - x} r270`);
+      vehicle.transform(`t${1130 + y},${506 - x} r270`) // start offscreen
+        .animate({ transform: `t${850 + y},${506 - x} r270` }, 1000, mina.easein);
     } else if (dir === 'west') {
       // lane 0 is 180-, stop line is 524+
-      vehicle.transform(`t${180 - y},${524 + x} r90`);
+      vehicle.transform(`t${-100 - y},${524 + x} r90`) // start offscreen
+        .animate({ transform: `t${180 - y},${524 + x} r90` }, 1000, mina.easein);
     }
 
     // track all vehicles coming through the intersection
     this.update({
+      // this doesn't really _need_ to be immutable, but the update
+      // method is, so let's treat state like it should be
       vehicles: {
-        ...this.state.vehicles,
+        ...vehicles,
         [dir]: [
-          ...road.slice(0, lane),
-          road[lane].concat(vehicle),
-          ...road.slice(lane + 1)
+          ...vehicles[dir].slice(0, lane),
+          vehicles[dir][lane].concat(vehicle),
+          ...vehicles[dir].slice(lane + 1)
         ]
       }
     });
@@ -215,5 +222,5 @@ class TrafficIntersection {
 // kick things off
 TrafficIntersection.start({
   timing: 20000,
-  rate: 1000
+  rate: 500
 });
