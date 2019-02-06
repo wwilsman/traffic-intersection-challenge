@@ -193,10 +193,22 @@ class TrafficIntersection {
   }
 
   canDrive(dir, lane) {
-    let { lights } = this.state;
+    let { lights, vehicles } = this.state;
     let key = (dir === 'north' || dir === 'south') ? 'north-south' : 'east-west';
+
+    // determine if the opposite lane has oncoming traffic
+    let oppLanesEmpty = () => {
+      let oppDir = dir === 'north' ? 'south'
+        : dir === 'south' ? 'north'
+        : dir === 'east' ? 'west'
+        : 'east'
+      return !vehicles[oppDir][1].length && !vehicles[oppDir][2].length;
+    }
+
     return lane === 3 || // right turn can always turn
-      (lights[key] === 'go' && lane > 0 && lane < 3);
+      (lights[key] === 'turn' && lane === 0) || // left turn only
+      (lights[key] === 'go' && lane > 0 && lane < 3) || // straight lanes
+      (lights[key] === 'go' && lane === 0 && oppLanesEmpty()); // left turn when opposite lane is empty
   }
 
   calcTransform(dir, lane, pos, index = 0) {
@@ -234,9 +246,9 @@ class TrafficIntersection {
     return { r, x, y, t: `t${x},${y} r${r}` };
   }
 
-  // calculates the turning path for a turn lane
-  calcTurn(dir, lane, index) {
-    let { r, x, y } = this.calcTransform(dir, lane, 'stop', index);
+  // calculates the turning path for a right turn lane
+  calcRightTurn(dir, index) {
+    let { r, x, y } = this.calcTransform(dir, 3, 'stop', index);
     let startOffset = 200 * (index + 1); // start the car back off screen
     let turnOffset = 142; // how far the next lane is from this lane
     let laneStart, laneEnd, turnStart, curve;
@@ -288,6 +300,69 @@ class TrafficIntersection {
     };
   }
 
+  // calculates the turning path for a left turn lane
+  calcLeftTurn(dir, index, offscreen) {
+    let { r, x, y } = this.calcTransform(dir, 0, 'stop', index);
+    let startOffset = 100 * index; // starting offset based on lane index
+    let turnOffset = 404; // how far the next lane is from this lane
+    let laneStart, laneEnd, turnStart, curve;
+
+    if (dir === 'north') {
+      r += 90; // adjust rotation relative to path
+      laneStart = offscreen ? [x, -100] : [x, y - 50]; // offset to prevent jumping due to rotation offset
+      laneEnd = [1030, y + startOffset + turnOffset]; // end off screen
+      turnStart = [x, y + startOffset + (turnOffset / 4)] // start turning
+      curve = [
+        [x, y + (turnOffset / 2) + startOffset], // bezier 1
+        [x + (turnOffset / 4), y + turnOffset + startOffset], // bezier 2
+        [x + turnOffset, y + turnOffset + startOffset] // end of turn
+      ];
+    } else if (dir === 'south') {
+      r -= 90; // adjust rotation relative to path
+      laneStart = offscreen ? [x, 1130] : [x, y + 50]; // offset to prevent jumping due to rotation offset
+      laneEnd = [-100, y - startOffset - turnOffset]; // end off screen
+      turnStart = [x, y - startOffset - (turnOffset / 4)] // start turning
+      curve = [
+        [x, y - (turnOffset / 2) - startOffset], // bezier 1
+        [x - (turnOffset / 4), y - turnOffset - startOffset], // bezier 2
+        [x - turnOffset, y - turnOffset - startOffset] // end of turn
+      ];
+    } else if (dir === 'east') {
+      if (offscreen) laneStart = [1130, y]; // start offscreen
+      laneStart = offscreen ? [1130, y] : [x + 50, y]; // offset to prevent jumping due to rotation offset
+      laneEnd = [x - turnOffset - startOffset, 1130]; // end off screen
+      turnStart = [x - (turnOffset / 4) - startOffset, y] // start turning
+      curve = [
+        [x - (turnOffset / 2) - startOffset, y], // bezier 1
+        [x - turnOffset - startOffset, y + (turnOffset / 4)], // bezier 2
+        [x - turnOffset - startOffset, y + turnOffset] // end of turn
+      ];
+    } else if (dir === 'west') {
+      r += 180; // adjust rotation relative to path
+      laneStart = offscreen ? [-100, y] : [x - 50, y]; // offset to prevent jumping due to rotation offset
+      laneEnd = [x + turnOffset + startOffset, -100]; // end off screen
+      turnStart = [x + (turnOffset / 4) + startOffset, y] // start turning halfway through
+      curve = [
+        [x + (turnOffset / 2) + startOffset, y], // bezier 1
+        [x + turnOffset + startOffset, y - (turnOffset / 4)], // bezier 2
+        [x + turnOffset + startOffset, y - turnOffset] // end of turn
+      ];
+    }
+
+    return {
+      r, x, y,
+      d: `M${laneStart} L${turnStart} C${curve.join(' ')} L${laneEnd}`
+    };
+  }
+
+  calcTurn(dir, lane, index, offscreen) {
+    if (lane === 0) {
+      return this.calcLeftTurn(dir, index, offscreen);
+    } else {
+      return this.calcRightTurn(dir, index);
+    }
+  }
+
   addRandomVehicle() {
     let { vehicles } = this.state;
 
@@ -306,26 +381,17 @@ class TrafficIntersection {
 
     // get a random vehicle
     let vehicle = this.svg.use(getRandVehicleId());
-    // right turns start offscreen, so ignore them during positioning
-    let canDrive = this.canDrive(dir, lane) && lane < 3;
     let index = vehicles[dir][lane].length;
 
     // position in the lane
-    let { t: start } = this.calcTransform(dir, lane, 'start', index);
-    let { t: end } = this.calcTransform(dir, lane, !canDrive && 'stop', index);
+    let start = this.calcTransform(dir, lane, 'start', index);
+    vehicle.appendTo(this.svg.select('.cars')).transform(start.t);
 
-    // TODO: turning
-    vehicle
-      .appendTo(this.svg.select('.cars'))
-      .transform(start)
-      .animate(
-        { transform: end },
-        canDrive ? 3000 : 1000,
-        canDrive ? mina.linear : mina.easein
-      );
+    // drive
+    this.drive(vehicle, dir, lane, index, true);
 
     // track all vehicles stopping at the intersection
-    if (!canDrive) {
+    if (!this.canDrive(dir, lane)) {
       this.update({
         vehicles: {
           [dir]: [
@@ -338,70 +404,67 @@ class TrafficIntersection {
     }
   }
 
+  drive(vehicle, dir, lane, index, offscreen) {
+    // can't drive, pull up
+    if (!this.canDrive(dir, lane)) {
+      let end = this.calcTransform(dir, lane, 'stop', index);
+      vehicle.animate({ transform: end.t }, 1000, mina.easein);
+
+    // turning lanes
+    } else if (lane === 0 || lane === 3) {
+      let p = this.calcTurn(dir, lane, index, offscreen);
+      let path = this.svg.path(p.d).attr({ fill: 'none' });
+      let len = Snap.path.getTotalLength(path);
+      let ease = lane === 0 ? mina.easeout : mina.linear;
+      let duration = offscreen && lane === 0 ? 2400 : 2000;
+
+      // animate along the generated path
+      Snap.animate(0, len, step => {
+        let point = Snap.path.getPointAtLength(path, step);
+        let r = point.alpha + p.r; // offset rotation relative to path
+        let y = point.y - 50; // pivot closer to the back of the car
+        let x = point.x;
+
+        vehicle.transform(`t${x},${y} r${r},0,50`);
+      }, duration, ease, () => {
+        vehicle.remove();
+        path.remove();
+      });
+
+    // straight lanes
+    } else {
+      let end = this.calcTransform(dir, lane, 'end', index);
+      vehicle.animate({ transform: end.t }, 2200, mina.easeout, vehicle.remove);
+    }
+  }
+
+  // cars that are able to drive should try
   pingVehicles() {
     let { lights, vehicles } = this.state;
 
     entries(vehicles).forEach(([dir, road]) => {
       road.forEach(async (lane, l) => {
-        // empty lane
         if (lane.length === 0) return;
 
         if (this.canDrive(dir, l)) {
-          // left turn
-          if (l === 0) {
-            // TODO
+          lane.forEach(async (v, i) => {
+            // cars don't start at the same time
+            await wait(200 * i + floor(100 * random()));
+            this.drive(v, dir, l, i);
+          });
 
-          // straight
-          } else if (l < 3) {
-            lane.forEach(async (vehicle, i) => {
-              await wait(200 * i + floor(100 * random())); // cars don't start at the same time
-              let { t } = this.calcTransform(dir, l, 'end', i);
-              vehicle.animate({ transform: t }, 2200, mina.easeout, vehicle.remove);
-            });
+          // wait half the rate before considering the lane empty
+          await wait(this.options.rate / 2);
 
-            // wait half the rate before considering the lane empty
-            await wait(this.options.rate / 2);
-
-            this.update({
-              vehicles: {
-                [dir]: [
-                  ...this.state.vehicles[dir].slice(0, l),
-                  [], // lane should now be empty
-                  ...this.state.vehicles[dir].slice(l + 1)
-                ]
-              }
-            });
-
-          // right turn
-          } else if (l === 3) {
-            lane.forEach((vehicle, i) => {
-              let p = this.calcTurn(dir, l, i);
-              let path = this.svg.path(p.d).attr({ fill: 'none' });
-              let len = Snap.path.getTotalLength(path);
-
-              // animate along the generated path
-              Snap.animate(0, len, step => {
-                let point = Snap.path.getPointAtLength(path, step);
-                let r = point.alpha + p.r; // offset rotation relative to path
-                let y = point.y - 50; // pivot closer to the back of the car
-                let x = point.x;
-
-                vehicle.transform(`t${x},${y} r${r},0,50`);
-              }, 2000, mina.linear, () => {
-                vehicle.remove();
-                path.remove();
-              });
-            });
-
-            this.update({
-              vehicles: {
-                [dir]: [
-                  ...this.state.vehicles[dir].slice(0, l),
-                  [] // lane should now be empty
-                ]
-              }
-            });
-          }
+          this.update({
+            vehicles: {
+              [dir]: [
+                ...this.state.vehicles[dir].slice(0, l),
+                [], // lane should now be empty
+                ...this.state.vehicles[dir].slice(l + 1)
+              ]
+            }
+          });
         }
       });
     });
