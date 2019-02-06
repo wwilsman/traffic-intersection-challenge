@@ -49,11 +49,11 @@ avoidance is only facilitated by animation timing.
   intersection turn green at the same time, letting cars safely turn
   left. Make sure the "straight" lights are red! You don't want any
   accidents!
-- [] Some traffic lights have sensors underneath the road to detect if
+- [ ] Some traffic lights have sensors underneath the road to detect if
   there are cars waiting. Make your signal smart! For example, if
   there are no cars waiting, keep that light red. What if cars begin
   to arrive? How long do you keep the light red?
-- [] Add support for a "walk" button at each intersection. When the
+- [ ] Add support for a "walk" button at each intersection. When the
   button is pressed, it should cause the intersection to become clear
   long enough for a person to walk through it.
 
