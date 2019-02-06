@@ -34,6 +34,10 @@ function getRandLane(lanes) {
   return [dir, lane];
 }
 
+// This doesn't need to be a class, but instead could be a series of
+// functional callbacks, especially since it's a singleton. The class
+// syntax just provides some nice isolation of state within the
+// context of the intersection
 class TrafficIntersection {
   // injects the SVG content into the DOM
   static load() {
@@ -162,8 +166,6 @@ class TrafficIntersection {
     let trafficDir = keys(lights).find(k => lights[k] === 'go');
     let oppositeDir = keys(lights).find(k => lights[k] === 'stop');
 
-    if (!trafficDir || !oppositeDir) console.log(lights);
-
     // change straight lights to yellow
     this.changeLane(trafficDir, 'straight', 'yellow');
     // change flashing yellow turn to solid
@@ -193,8 +195,8 @@ class TrafficIntersection {
   canDrive(dir, lane) {
     let { lights } = this.state;
     let key = (dir === 'north' || dir === 'south') ? 'north-south' : 'east-west';
-    // TODO: logic for turn lanes
-    return lights[key] === 'go' && lane > 0 && lane < 3;
+    return lane === 3 || // right turn can always turn
+      (lights[key] === 'go' && lane > 0 && lane < 3);
   }
 
   calcTransform(dir, lane, pos, index = 0) {
@@ -228,7 +230,62 @@ class TrafficIntersection {
         : 1230 - posOffset; // other side
     }
 
-    return `t${x},${y} r${r}`;
+    // return raw values along with a transform string
+    return { r, x, y, t: `t${x},${y} r${r}` };
+  }
+
+  // calculates the turning path for a turn lane
+  calcTurn(dir, lane, index) {
+    let { r, x, y } = this.calcTransform(dir, lane, 'stop', index);
+    let startOffset = 200 * (index + 1); // start the car back off screen
+    let turnOffset = 142; // how far the next lane is from this lane
+    let laneStart, laneEnd, turnStart, curve;
+
+    if (dir === 'north') {
+      r += 90; // adjust rotation relative to path
+      laneStart = [x, y - startOffset];
+      laneEnd = [-100, y + turnOffset]; // end off screen
+      turnStart = [x, y + (turnOffset / 2)] // start turning halfway through
+      curve = [
+        [x, y + turnOffset], // bezier 1
+        [x - (turnOffset / 2), y + turnOffset], // bezier 2
+        [x - turnOffset, y + turnOffset] // end of turn
+      ];
+    } else if (dir === 'south') {
+      r -= 90; // adjust rotation relative to path
+      laneStart = [x, y + startOffset];
+      laneEnd = [1130, y - turnOffset]; // end off screen
+      turnStart = [x, y - (turnOffset / 2)] // start turning halfway through
+      curve = [
+        [x, y - turnOffset], // bezier 1
+        [x + (turnOffset / 2), y - turnOffset], // bezier 2
+        [x + turnOffset, y - turnOffset] // end of turn
+      ];
+    } else if (dir === 'east') {
+      laneStart = [x + startOffset, y];
+      laneEnd = [x - turnOffset, -100]; // end off screen
+      turnStart = [x - (turnOffset / 2), y] // start turning halfway through
+      curve = [
+        [x - turnOffset, y], // bezier 1
+        [x - turnOffset, y - (turnOffset / 2)], // bezier 2
+        [x - turnOffset, y - turnOffset] // end of turn
+      ];
+    } else if (dir === 'west') {
+      r += 180; // adjust rotation relative to path
+      laneStart = [x - startOffset, y];
+      laneEnd = [x + turnOffset, 1130]; // end off screen
+      turnStart = [x + (turnOffset / 2), y] // start turning halfway through
+      curve = [
+        [x + turnOffset, y], // bezier 1
+        [x + turnOffset, y + (turnOffset / 2)], // bezier 2
+        [x + turnOffset, y + turnOffset] // end of turn
+      ];
+    }
+
+    return {
+      r, x, y,
+      d: `M${laneStart} L${turnStart} C${curve.join(' ')} L${laneEnd}`
+    };
   }
 
   addRandomVehicle() {
@@ -249,13 +306,15 @@ class TrafficIntersection {
 
     // get a random vehicle
     let vehicle = this.svg.use(getRandVehicleId());
-    let canDrive = this.canDrive(dir, lane);
+    // right turns start offscreen, so ignore them during positioning
+    let canDrive = this.canDrive(dir, lane) && lane < 3;
     let index = vehicles[dir][lane].length;
 
     // position in the lane
-    let start = this.calcTransform(dir, lane, 'start', index);
-    let end = this.calcTransform(dir, lane, !canDrive && 'stop', index);
+    let { t: start } = this.calcTransform(dir, lane, 'start', index);
+    let { t: end } = this.calcTransform(dir, lane, !canDrive && 'stop', index);
 
+    // TODO: turning
     vehicle
       .appendTo(this.svg.select('.cars'))
       .transform(start)
@@ -284,8 +343,11 @@ class TrafficIntersection {
 
     entries(vehicles).forEach(([dir, road]) => {
       road.forEach(async (lane, l) => {
+        // empty lane
+        if (lane.length === 0) return;
+
         if (this.canDrive(dir, l)) {
-          // right turn
+          // left turn
           if (l === 0) {
             // TODO
 
@@ -293,7 +355,7 @@ class TrafficIntersection {
           } else if (l < 3) {
             lane.forEach(async (vehicle, i) => {
               await wait(200 * i + floor(100 * random())); // cars don't start at the same time
-              let t = this.calcTransform(dir, l, 'end', i);
+              let { t } = this.calcTransform(dir, l, 'end', i);
               vehicle.animate({ transform: t }, 2200, mina.easeout, vehicle.remove);
             });
 
@@ -310,9 +372,35 @@ class TrafficIntersection {
               }
             });
 
-          // left turn
+          // right turn
           } else if (l === 3) {
-            // TODO
+            lane.forEach((vehicle, i) => {
+              let p = this.calcTurn(dir, l, i);
+              let path = this.svg.path(p.d).attr({ fill: 'none' });
+              let len = Snap.path.getTotalLength(path);
+
+              // animate along the generated path
+              Snap.animate(0, len, step => {
+                let point = Snap.path.getPointAtLength(path, step);
+                let r = point.alpha + p.r; // offset rotation relative to path
+                let y = point.y - 50; // pivot closer to the back of the car
+                let x = point.x;
+
+                vehicle.transform(`t${x},${y} r${r},0,50`);
+              }, 2000, mina.linear, () => {
+                vehicle.remove();
+                path.remove();
+              });
+            });
+
+            this.update({
+              vehicles: {
+                [dir]: [
+                  ...this.state.vehicles[dir].slice(0, l),
+                  [] // lane should now be empty
+                ]
+              }
+            });
           }
         }
       });
